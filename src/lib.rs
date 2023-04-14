@@ -35,13 +35,13 @@ impl fmt::Display for Universe {
             write!(f, "\n")?;
         }
 
-        Ok(())
+        return Ok(())
     }
 }
 
 impl Universe {
     fn get_index(&self, row: u32, column: u32) -> usize {
-        (row * self.width + column) as usize
+        return (row * self.width + column) as usize
     }
 
     fn live_neighbor_count(&self, row: u32, column: u32) -> u8 {
@@ -58,7 +58,8 @@ impl Universe {
                 count += self.cells[idx] as u8;
             }
         }
-        count
+
+        return count
     }
 }
 
@@ -79,17 +80,13 @@ impl Universe {
             })
             .collect();
 
-        Universe {
+        return Universe {
             width,
             height,
             cells,
         }
     }
 
-    pub fn render(&self) -> String {
-        self.to_string()
-    }
-    
     pub fn tick(&mut self) {
         let mut next = self.cells.clone();
 
@@ -124,14 +121,14 @@ impl Universe {
     }
 
     pub fn width(&self) -> u32 {
-        self.width
+        return self.width
     }
 
     pub fn height(&self) -> u32 {
-        self.height
+        return self.height
     }
 
     pub fn cells(&self) -> *const Cell {
-        self.cells.as_ptr()
+        return self.cells.as_ptr()
     }
 }

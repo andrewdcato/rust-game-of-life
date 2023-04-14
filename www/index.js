@@ -18,6 +18,15 @@ canvas.width = (CELL_SIZE + 1) * width + 1;
 
 const ctx = canvas.getContext('2d');
 
+const renderLoop = () => {
+  universe.tick();
+
+  drawGrid();
+  drawCells();
+
+  return requestAnimationFrame(renderLoop);
+};
+
 const drawGrid = () => {
   ctx.beginPath();
   ctx.strokeStyle = GRID_COLOR;
@@ -34,7 +43,7 @@ const drawGrid = () => {
     ctx.lineTo((CELL_SIZE + 1) * width + 1, j * (CELL_SIZE + 1) + 1);
   }
 
-  ctx.stroke();
+  return ctx.stroke();
 };
 
 const getIndex = (row, column) => {
@@ -64,18 +73,10 @@ const drawCells = () => {
     }
   }
 
-  ctx.stroke();
+  return ctx.stroke();
 };
 
 // RUN THE THING
-const renderLoop = () => {
-  universe.tick();
-
-  drawGrid();
-  drawCells();
-
-  requestAnimationFrame(renderLoop);
-};
 
 drawGrid();
 drawCells();
