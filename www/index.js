@@ -18,15 +18,6 @@ canvas.width = (CELL_SIZE + 1) * width + 1;
 
 const ctx = canvas.getContext('2d');
 
-const renderLoop = () => {
-  universe.tick();
-
-  drawGrid();
-  drawCells();
-
-  return requestAnimationFrame(renderLoop);
-};
-
 const drawGrid = () => {
   ctx.beginPath();
   ctx.strokeStyle = GRID_COLOR;
@@ -76,9 +67,54 @@ const drawCells = () => {
   return ctx.stroke();
 };
 
+// Handle renders / interactivity
+let animationId = null;
+
+const renderLoop = () => {
+  universe.tick();
+
+  drawGrid();
+  drawCells();
+
+  animationId = requestAnimationFrame(renderLoop);
+};
+
+const isPaused = () => animationId === null;
+const playPauseButton = document.getElementById('play-pause');
+
+const play = () => {
+  playPauseButton.textContent = "⏸";
+  renderLoop();
+}
+
+const pause = () => {
+  playPauseButton.textContent = "▶";
+  cancelAnimationFrame(animationId);
+  animationId = null;
+}
+
+playPauseButton.addEventListener('click', event => {
+  if (isPaused()) return play();
+  return pause();
+});
+
+canvas.addEventListener('click', event => {
+  const boundary = canvas.getBoundingClientRect();
+
+  const x = canvas.width / boundary.width;
+  const y = canvas.height / boundary.height;
+
+  const canvasLeft = (event.clientX - boundary.left) * x;
+  const canvasTop  = (event.clientY - boundary.top) * y;
+
+  const row = Math.min(Math.floor(canvasTop / (CELL_SIZE + 1)), height - 1);
+  const col = Math.min(Math.floor(canvasLeft / (CELL_SIZE + 1)), width - 1);
+
+  universe.toggle_cell(row, col);
+
+  drawGrid();
+  drawCells();
+});
+
 // RUN THE THING
-
-drawGrid();
-drawCells();
-requestAnimationFrame(renderLoop);
-
+play();

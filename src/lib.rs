@@ -3,6 +3,15 @@ mod utils;
 use std::fmt;
 use wasm_bindgen::prelude::*;
 
+extern crate web_sys;
+
+// A macro to provide `println!(..)`-style syntax for `console.log` logging.
+macro_rules! log {
+    ( $( $t:tt )* ) => {
+        web_sys::console::log_1(&format!( $( $t )* ).into());
+    }
+}
+
 // When the `wee_alloc` feature is enabled, use `wee_alloc` as the global
 // allocator.
 #[cfg(feature = "wee_alloc")]
@@ -69,8 +78,8 @@ impl Universe {
     pub fn new() -> Universe {
         utils::set_panic_hook();
 
-        let width = 64;
-        let height = 64;
+        let width = 128;
+        let height = 128;
 
         let cells = (0..width * height)
             .map(|i| {
@@ -98,6 +107,14 @@ impl Universe {
                 let cell = self.cells[idx];
                 let live_neighbors = self.live_neighbor_count(row, col);
 
+                // log!(
+                //     "cell[{}, {} is initially {:?} and has {} live neighbours!]", 
+                //     row, 
+                //     col, 
+                //     cell, 
+                //     live_neighbors
+                // );
+
                 let next_cell = match (cell, live_neighbors) {
                     // Rule 1: Any live cell with fewer than two live neighbours dies: underpopulation.
                     (Cell::Alive, x) if x < 2 => Cell::Dead,
@@ -110,6 +127,8 @@ impl Universe {
                     // All other cells remain in the same state.
                     (otherwise, _) => otherwise,
                 };
+
+                // log!("   it becomes {:?}", next_cell);
 
                 next[idx] = next_cell;
             }
@@ -141,6 +160,11 @@ impl Universe {
         self.height = height;
         self.cells = (0..self.width * height).map(|_i| Cell::Dead).collect();
     }
+
+    pub fn toggle_cell(&mut self, row: u32, col: u32) {
+        let idx = self.get_index(row, col);
+        self.cells[idx].toggle();
+    }
 }
 
 // Public functions - NO WASM_BINDGEN!!!
@@ -153,6 +177,15 @@ impl Universe {
         for (row, col) in cells.iter().cloned() {
             let idx = self.get_index(row, col);
             self.cells[idx] = Cell::Alive;
+        }
+    }
+}
+
+impl Cell {
+    fn toggle (&mut self) {
+        *self = match *self {
+            Cell::Dead => Cell::Alive,
+            Cell::Alive => Cell::Dead,
         }
     }
 }
